@@ -37,12 +37,12 @@ export function AuthControls() {
   }
 
   if (isLoading) {
-    return <span className="text-sm text-slate-500">Checking session…</span>;
+    return <span className="text-sm text-ink/40">…</span>;
   }
 
   if (!email || !isCuetEmail(email)) {
     return (
-      <Link className="rounded-md bg-cyan-700 px-4 py-2 text-sm font-semibold text-white" href="/login">
+      <Link className="bg-blueprint px-3.5 py-1.5 text-sm font-semibold text-white hover:bg-blueprint-deep" href="/login">
         Log in
       </Link>
     );
@@ -50,12 +50,8 @@ export function AuthControls() {
 
   return (
     <div className="flex items-center gap-3">
-      <span className="hidden text-sm text-slate-600 sm:inline">{email}</span>
-      <button
-        className="rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700"
-        onClick={handleLogout}
-        type="button"
-      >
+      <span className="hidden font-mono text-xs text-ink/50 sm:inline">{email}</span>
+      <button className="border border-line px-3.5 py-1.5 text-sm font-medium text-ink hover:border-ink/40" onClick={handleLogout} type="button">
         Log out
       </button>
     </div>

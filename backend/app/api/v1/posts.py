@@ -8,14 +8,17 @@ from app.api.dependencies import get_current_user
 from app.core.security import CurrentUser
 from app.database.models.post import PostStatus, PostType
 from app.database.session import get_db_session
+from app.schemas.claim import ClaimRead
 from app.schemas.post import CATEGORIES, PostCreate, PostListResponse, PostRead, PostUpdate
 from app.schemas.similarity import SimilarPostRead
+from app.services.claim_service import ClaimService
 from app.services.post_service import PostService
 from app.services.similarity_service import SimilarityService
 
 router = APIRouter(prefix="/api/v1/posts", tags=["posts"])
 service = PostService()
 similarity_service = SimilarityService()
+claim_service = ClaimService()
 
 
 @router.post("", response_model=PostRead, status_code=status.HTTP_201_CREATED)
@@ -44,6 +47,17 @@ def list_posts(
     return PostListResponse(items=items, page=page, limit=limit, total=total)
 
 
+@router.get("/mine", response_model=list[PostRead])
+def list_my_posts(
+    current_user: Annotated[CurrentUser, Depends(get_current_user)],
+    session: Annotated[Session, Depends(get_db_session)],
+) -> list[PostRead]:
+    """All of the current user's own posts, any status - powers the
+    dashboard's My Posts / My Lost / My Found / My Resolved sections.
+    Registered before /{post_id} so "mine" isn't swallowed as a post_id."""
+    return service.list_my_posts(session, UUID(current_user.id))
+
+
 @router.get("/{post_id}/similar", response_model=list[SimilarPostRead])
 def get_similar_posts(
     post_id: UUID,
@@ -64,6 +78,15 @@ def get_similar_posts(
         )
         for post, score in matches
     ]
+
+
+@router.get("/{post_id}/claims", response_model=list[ClaimRead])
+def get_claims_for_post(
+    post_id: UUID,
+    current_user: Annotated[CurrentUser, Depends(get_current_user)],
+    session: Annotated[Session, Depends(get_db_session)],
+) -> list[ClaimRead]:
+    return claim_service.list_claims_for_post(session, post_id, UUID(current_user.id))
 
 
 @router.get("/{post_id}", response_model=PostRead)

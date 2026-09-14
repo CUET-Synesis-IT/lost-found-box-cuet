@@ -137,3 +137,24 @@ def test_filtering_search_and_pagination() -> None:
 
 def test_standard_postgres_url_uses_pg8000() -> None:
     assert normalize_database_url("postgresql://user:password@host:5432/database") == "postgresql+pg8000://user:password@host:5432/database"
+
+
+def test_mine_requires_auth() -> None:
+    app.dependency_overrides.pop(get_current_user)
+    assert TestClient(app).get("/api/v1/posts/mine").status_code == 401
+
+
+def test_mine_returns_only_current_users_posts_regardless_of_status() -> None:
+    client = TestClient(app)
+    mine_active = create_post(client, description="My active lost wallet")
+    mine_resolved = create_post(client, description="My resolved item")
+    client.put(f"/api/v1/posts/{mine_resolved['id']}", json={"location": "Somewhere"})
+
+    app.dependency_overrides[get_current_user] = other_user
+    create_post(client, description="Someone else's post")
+    app.dependency_overrides[get_current_user] = owner
+
+    response = client.get("/api/v1/posts/mine")
+    assert response.status_code == 200
+    ids = {p["id"] for p in response.json()}
+    assert ids == {mine_active["id"], mine_resolved["id"]}

@@ -32,6 +32,15 @@ class PostRepository:
             select(Post).where(Post.post_type == opposite_type, Post.status == PostStatus.ACTIVE)
         ).all())
 
+    def list_by_owner(self, session: Session, user_id: UUID) -> list[Post]:
+        """All of a user's own posts, any status - for their dashboard.
+        Unlike the public feed (filtered_statement), this deliberately does
+        NOT default to ACTIVE-only, since owners need to see their
+        RESOLVED/CLAIM_PENDING/ARCHIVED posts too."""
+        return list(session.scalars(
+            select(Post).where(Post.user_id == user_id).order_by(Post.created_at.desc())
+        ).all())
+
     def list(self, session: Session, statement: Select[tuple[Post]], page: int, limit: int) -> tuple[list[Post], int]:
         total = session.scalar(select(func.count()).select_from(statement.order_by(None).subquery())) or 0
         items = session.scalars(statement.order_by(Post.created_at.desc()).offset((page - 1) * limit).limit(limit)).all()

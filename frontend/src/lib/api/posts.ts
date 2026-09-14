@@ -21,6 +21,9 @@ export const postsApi = {
     params.set("limit", String(filters.limit ?? 12));
     return apiRequest<PostList>(`/api/v1/posts?${params.toString()}`);
   },
+  mine() {
+    return apiRequest<Post[]>("/api/v1/posts/mine", {}, true);
+  },
   get(postId: string) {
     return apiRequest<Post>(`/api/v1/posts/${postId}`);
   },

@@ -32,4 +32,11 @@ uvicorn app.main:app --reload --port 8000
 
 The health endpoint is available at `http://localhost:8000/health`.
 
-Authentication, Supabase integration, posts, and claims are intentionally not part of Phase 1.
+## Supabase integration foundation
+
+The reusable browser Supabase client and backend token-validation configuration
+are in place. Follow [docs/supabase-setup.md](docs/supabase-setup.md) to
+configure a Supabase project and local environment files.
+
+Authentication UI, user authorization, database schema, posts, claims, and
+file uploads are intentionally deferred to their dedicated implementation phases.

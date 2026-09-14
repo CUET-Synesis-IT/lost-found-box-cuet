@@ -35,3 +35,14 @@ export type PostList = {
   limit: number;
   total: number;
 };
+
+export type SimilarPost = {
+  post_id: string;
+  post_type: PostType;
+  category: string;
+  description: string;
+  location: string;
+  event_time: string;
+  image_url: string | null;
+  similarity_score: number;
+};

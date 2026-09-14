@@ -1,5 +1,5 @@
 import { apiRequest } from "./client";
-import type { Post, PostList, PostPayload, PostStatus, PostType } from "@/types/posts";
+import type { Post, PostList, PostPayload, PostStatus, PostType, SimilarPost } from "@/types/posts";
 
 type PostFilters = {
   postType?: PostType;
@@ -23,6 +23,9 @@ export const postsApi = {
   },
   get(postId: string) {
     return apiRequest<Post>(`/api/v1/posts/${postId}`);
+  },
+  getSimilar(postId: string) {
+    return apiRequest<SimilarPost[]>(`/api/v1/posts/${postId}/similar?limit=5`);
   },
   create(payload: PostPayload) {
     return apiRequest<Post>("/api/v1/posts", { method: "POST", body: JSON.stringify(payload) }, true);

@@ -1,6 +1,6 @@
 from functools import lru_cache
 
-from pydantic import SecretStr
+from pydantic import SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -21,6 +21,18 @@ class Settings(BaseSettings):
     supabase_jwks_url: str | None = None
     supabase_jwt_audience: str = "authenticated"
     database_url: SecretStr | None = None
+
+    @field_validator("debug", mode="before")
+    @classmethod
+    def parse_debug_value(cls, value: bool | str) -> bool | str:
+        """Accept conventional environment labels without weakening typing."""
+        if isinstance(value, str):
+            normalized = value.strip().lower()
+            if normalized in {"release", "production", "prod"}:
+                return False
+            if normalized in {"development", "dev"}:
+                return True
+        return value
 
     @property
     def cors_origin_list(self) -> list[str]:

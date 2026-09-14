@@ -65,3 +65,11 @@ and the dependencies in `requirements.txt` are installed.
 The tracked database foundation (schema, constraints, indexes, profile trigger,
 and RLS) is documented in [docs/database.md](docs/database.md). Posts, claims,
 and file-upload APIs/UI remain intentionally deferred to their dedicated phases.
+
+## Posts API
+
+FastAPI now provides the authenticated Posts API at `/api/v1/posts`, including
+create, browse, detail, update, delete, filtering, search, and pagination.
+Request/response examples and error behavior are in [docs/api.md](docs/api.md).
+The frontend post-management pages, image upload workflow, similarity, and
+claims remain separate implementation phases.

@@ -10,7 +10,7 @@ TEST_SUPABASE_URL = "https://example.supabase.co"
 TEST_JWT_SECRET = "test-jwt-secret-not-for-production"
 
 
-def test_settings() -> Settings:
+def make_test_settings() -> Settings:
     return Settings(
         supabase_url=TEST_SUPABASE_URL,
         supabase_jwt_secret=TEST_JWT_SECRET,
@@ -35,7 +35,7 @@ def make_token(email: str) -> str:
 
 
 def setup_function() -> None:
-    app.dependency_overrides[get_settings] = test_settings
+    app.dependency_overrides[get_settings] = make_test_settings
 
 
 def teardown_function() -> None:

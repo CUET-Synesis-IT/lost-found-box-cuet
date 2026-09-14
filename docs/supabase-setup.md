@@ -49,11 +49,11 @@ for table relationships, constraints, and the RLS verification query.
 
 ## 4. Storage
 
-Create a bucket named `lost-found-images` when the project is provisioned.
-The application has a shared frontend constant for this name, but it does not
-upload files yet. The schema/storage phase must add owner-scoped policies for
-paths like `posts/{user_id}/{post_id}/{filename}`, file validation, and the
-chosen public-read policy.
+The tracked Storage migration creates `lost-found-images` with public reads and
+authenticated owner-only writes to `posts/{user_id}/{post_id}/{filename}`.
+It restricts uploads to JPEG, PNG, and WebP files at 5 MB. Apply it together
+with the database migration through `npx supabase db push`; do not create
+weaker Dashboard policies manually.
 
 ## Environment variables
 

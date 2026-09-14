@@ -68,3 +68,12 @@ from pg_tables
 where schemaname = 'public'
   and tablename in ('profiles', 'posts', 'claims', 'resolutions');
 ```
+
+## Storage image policy
+
+Migration `202609140002_lost_found_images_storage.sql` creates the public
+`lost-found-images` bucket. It accepts only JPEG, PNG, and WebP objects up to
+5 MB. Browser uploads use `posts/{user_id}/{post_id}/{filename}`. Storage RLS
+permits authenticated inserts, updates, and deletes only when the second path
+segment equals `auth.uid()`. The application saves the returned public URL in
+`posts.image_url`; PostgreSQL does not store image binaries.

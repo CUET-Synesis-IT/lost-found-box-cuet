@@ -26,6 +26,12 @@ class PostRepository:
         session.delete(post)
         session.flush()
 
+    def get_active_opposite_type_posts(self, session: Session, post_type: PostType) -> list[Post]:
+        opposite_type = PostType.FOUND if post_type == PostType.LOST else PostType.LOST
+        return list(session.scalars(
+            select(Post).where(Post.post_type == opposite_type, Post.status == PostStatus.ACTIVE)
+        ).all())
+
     def list(self, session: Session, statement: Select[tuple[Post]], page: int, limit: int) -> tuple[list[Post], int]:
         total = session.scalar(select(func.count()).select_from(statement.order_by(None).subquery())) or 0
         items = session.scalars(statement.order_by(Post.created_at.desc()).offset((page - 1) * limit).limit(limit)).all()

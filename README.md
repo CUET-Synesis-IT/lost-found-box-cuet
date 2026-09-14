@@ -9,8 +9,10 @@ A Next.js, FastAPI, and Supabase MVP for reporting CUET lost and found items.
 - PostgreSQL schema, constraints, indexes, and Row Level Security migrations.
 - Posts API: create, feed, filters, search, detail, edit, and delete.
 - Responsive posts UI with optional Supabase Storage image uploads.
+- Top-five LOST ↔ FOUND similarity API using weighted TF-IDF/cosine matching.
 
-Similarity matching and claims are not implemented yet.
+Claims are not implemented yet. Similarity UI is a later phase; the backend API
+is available at `GET /api/v1/posts/{post_id}/similar`.
 
 ## Prerequisites
 

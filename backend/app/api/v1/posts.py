@@ -9,10 +9,13 @@ from app.core.security import CurrentUser
 from app.database.models.post import PostStatus, PostType
 from app.database.session import get_db_session
 from app.schemas.post import CATEGORIES, PostCreate, PostListResponse, PostRead, PostUpdate
+from app.schemas.similarity import SimilarPostRead
 from app.services.post_service import PostService
+from app.services.similarity_service import SimilarityService
 
 router = APIRouter(prefix="/api/v1/posts", tags=["posts"])
 service = PostService()
+similarity_service = SimilarityService()
 
 
 @router.post("", response_model=PostRead, status_code=status.HTTP_201_CREATED)
@@ -39,6 +42,28 @@ def list_posts(
         raise HTTPException(status_code=422, detail="category must be one of the configured MVP categories")
     items, total = service.list_posts(session, post_type, category, status_filter, search, page, limit)
     return PostListResponse(items=items, page=page, limit=limit, total=total)
+
+
+@router.get("/{post_id}/similar", response_model=list[SimilarPostRead])
+def get_similar_posts(
+    post_id: UUID,
+    session: Annotated[Session, Depends(get_db_session)],
+    limit: int = Query(default=5, ge=1, le=5),
+) -> list[SimilarPostRead]:
+    matches = similarity_service.get_similar_posts(session, post_id, limit)
+    return [
+        SimilarPostRead(
+            post_id=post.id,
+            post_type=post.post_type,
+            category=post.category,
+            description=post.description,
+            location=post.location,
+            event_time=post.event_time,
+            image_url=post.image_url,
+            similarity_score=score,
+        )
+        for post, score in matches
+    ]
 
 
 @router.get("/{post_id}", response_model=PostRead)

@@ -14,6 +14,7 @@ Authorization: Bearer <access_token>
 | `POST` | `/posts` | Required | Create a LOST or FOUND post. |
 | `GET` | `/posts` | No | Browse posts with filters and pagination. |
 | `GET` | `/posts/{post_id}` | No | Get one post. |
+| `GET` | `/posts/{post_id}/similar` | No | Return up to five similar active opposite-type posts. |
 | `PUT` | `/posts/{post_id}` | Required | Update the authenticated user's post. |
 | `DELETE` | `/posts/{post_id}` | Required | Delete the authenticated user's post with no claims. |
 
@@ -47,6 +48,20 @@ to `ACTIVE`; clients cannot supply either field.
 
 Without `status`, the feed returns only `ACTIVE` posts. Results are ordered by
 newest creation time and use `{ items, page, limit, total }` pagination.
+
+## Similar posts
+
+`GET /api/v1/posts/{post_id}/similar?limit=5` returns at most five active,
+opposite-type matches. LOST posts compare only with FOUND posts and vice versa;
+resolved posts are excluded. Scores are normalized to `0`–`1` using:
+
+- TF-IDF/cosine description score: 0.40
+- exact category score: 0.30
+- normalized location text score: 0.20
+- UTC event-time proximity score: 0.10
+
+The text scorer is isolated behind an interface so semantic embeddings can
+replace it later without changing the route or response contract.
 
 ## Errors
 

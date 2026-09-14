@@ -1,4 +1,5 @@
 import { AuthControls } from "@/components/auth/auth-controls";
+import Link from "next/link";
 
 export default function HomePage() {
   return (
@@ -15,6 +16,9 @@ export default function HomePage() {
           The application is running. Sign in with a CUET institutional account
           to verify the authentication flow.
         </p>
+        <Link className="mt-6 inline-block rounded-md bg-cyan-700 px-4 py-2.5 font-semibold text-white" href="/posts">
+          Browse posts
+        </Link>
       </section>
     </main>
   );

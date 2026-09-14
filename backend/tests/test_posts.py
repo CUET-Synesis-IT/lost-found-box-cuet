@@ -10,6 +10,7 @@ from app.api.dependencies import get_current_user
 from app.core.security import CurrentUser
 from app.database.models import Base, Profile
 from app.database.session import get_db_session
+from app.database.session import normalize_database_url
 from app.main import app
 
 OWNER_ID = uuid4()
@@ -132,3 +133,7 @@ def test_filtering_search_and_pagination() -> None:
     assert response.json()["total"] == 2
     assert len(response.json()["items"]) == 1
     assert response.json()["items"][0]["post_type"] == "LOST"
+
+
+def test_standard_postgres_url_uses_pg8000() -> None:
+    assert normalize_database_url("postgresql://user:password@host:5432/database") == "postgresql+pg8000://user:password@host:5432/database"

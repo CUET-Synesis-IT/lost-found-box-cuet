@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 :root {
-  color: #172033;
-  background: #f8fafc;
+  color: #1c2530;
+  background: #f4f6f8;
 }
 
 * {
@@ -14,4 +14,27 @@
 body {
   margin: 0;
   min-height: 100vh;
+}
+
+/* Blueprint grid texture - used once, on the landing hero only. */
+.grid-paper {
+  background-image:
+    linear-gradient(to right, #d7dce2 1px, transparent 1px),
+    linear-gradient(to bottom, #d7dce2 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .grid-paper {
+    animation: grid-fade-in 900ms ease-out;
+  }
+}
+
+@keyframes grid-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }

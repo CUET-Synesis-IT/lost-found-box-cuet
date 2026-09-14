@@ -24,25 +24,45 @@ export function SimilarPosts({ postId, postType }: { postId: string; postType: P
 
   useEffect(() => {
     let active = true;
-    postsApi.getSimilar(postId)
-      .then((result) => { if (active) setMatches(result); })
-      .catch((requestError) => { if (active) setError(requestError instanceof Error ? requestError.message : "Similar posts could not be loaded."); });
-    return () => { active = false; };
+    postsApi
+      .getSimilar(postId)
+      .then((result) => {
+        if (active) setMatches(result);
+      })
+      .catch((requestError) => {
+        if (active) setError(requestError instanceof Error ? requestError.message : "Similar posts could not be loaded.");
+      });
+    return () => {
+      active = false;
+    };
   }, [postId]);
 
-  const title = postType === "LOST" ? "Similar Found Items" : "Similar Lost Items";
-  return <section className="mt-8 border-t border-slate-200 pt-7">
-    <h2 className="text-lg font-bold text-slate-800">{title}</h2>
-    <p className="mt-1 text-sm text-slate-500">Possible matches based on description, category, location, and time.</p>
-    {matches === null && !error ? <p className="py-6 text-sm text-slate-500">Finding similar items…</p> : null}
-    {error ? <p className="mt-4 rounded-md bg-slate-100 p-3 text-sm text-slate-600">Similar items are unavailable right now: {error}</p> : null}
-    {matches?.length === 0 ? <p className="py-6 text-sm text-slate-500">No similar active items were found.</p> : null}
-    {matches?.length ? <div className="mt-5 grid gap-3 sm:grid-cols-2">
-      {matches.map((match) => <Link className="rounded-lg border border-slate-200 bg-slate-50 p-4 transition hover:border-cyan-500 hover:bg-white" href={`/posts/${match.post_id}`} key={match.post_id}>
-        <div className="flex items-center justify-between gap-3"><span className="text-sm font-semibold text-slate-800">{match.category}</span><span className="rounded-full bg-cyan-100 px-2.5 py-1 text-xs font-bold text-cyan-800">{Math.round(match.similarity_score * 100)}% match</span></div>
-        <p className="mt-3 text-sm leading-6 text-slate-700">{truncate(match.description)}</p>
-        <p className="mt-3 text-xs text-slate-500">{match.location} · {formatDate(match.event_time)} BST</p>
-      </Link>)}
-    </div> : null}
-  </section>;
+  const title = postType === "LOST" ? "Similar found items" : "Similar lost items";
+
+  return (
+    <section className="mt-8 border-t border-line pt-7">
+      <h2 className="font-semibold text-ink">{title}</h2>
+      <p className="mt-1 text-sm text-ink/60">Possible matches based on description, category, location, and time.</p>
+
+      {matches === null && !error ? <p className="py-6 text-sm text-ink/50">Finding similar items…</p> : null}
+      {error ? <p className="mt-4 bg-paper p-3 text-sm text-ink/60">Similar items are unavailable right now: {error}</p> : null}
+      {matches?.length === 0 ? <p className="py-6 text-sm text-ink/50">No similar active items were found.</p> : null}
+
+      {matches?.length ? (
+        <div className="mt-5 grid gap-3 sm:grid-cols-2">
+          {matches.map((match) => (
+            <Link className="border border-line bg-paper p-4 transition hover:border-blueprint hover:bg-white" href={`/posts/${match.post_id}`} key={match.post_id}>
+              <div className="flex items-center justify-between gap-3">
+                <span className="text-sm font-medium text-ink">{match.category}</span>
+                <span className="font-mono text-xs font-medium text-blueprint">{Math.round(match.similarity_score * 100)}% match</span>
+              </div>
+              <p className="mt-3 text-sm leading-6 text-ink/70">{truncate(match.description)}</p>
+              <p className="mt-3 text-xs text-ink/50">{match.location}</p>
+              <p className="font-mono text-xs text-ink/40">{formatDate(match.event_time)}</p>
+            </Link>
+          ))}
+        </div>
+      ) : null}
+    </section>
+  );
 }

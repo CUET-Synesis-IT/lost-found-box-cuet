@@ -51,25 +51,31 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-slate-50 px-6">
-      <section className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
-        <Link className="text-sm font-semibold text-cyan-700" href="/">
-          ← CUET Lost and Found Box
-        </Link>
-        <h1 className="mt-6 text-3xl font-bold text-slate-900">Log in</h1>
-        <p className="mt-3 text-slate-600">
-          Use your CUET Google account ending in @student.cuet.ac.bd or @cuet.ac.bd.
+    <main className="mx-auto max-w-sm px-6 py-20">
+      <h1 className="text-2xl font-semibold text-ink">Log in</h1>
+      <p className="mt-3 text-ink/70">
+        Use your CUET Google account ending in @student.cuet.ac.bd or
+        @cuet.ac.bd.
+      </p>
+
+      {error ? (
+        <p className="mt-5 border-l-4 border-flag-rust bg-flag-rust-soft/40 px-3 py-2 text-sm text-ink">
+          {error}
         </p>
-        {error ? <p className="mt-4 rounded-md bg-red-50 p-3 text-sm text-red-700">{error}</p> : null}
-        <button
-          className="mt-6 w-full rounded-md bg-cyan-700 px-4 py-3 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-60"
-          disabled={isLoading}
-          onClick={handleGoogleLogin}
-          type="button"
-        >
-          {isLoading ? "Redirecting to Google…" : "Continue with Google"}
-        </button>
-      </section>
+      ) : null}
+
+      <button
+        className="mt-6 w-full bg-blueprint px-4 py-3 font-semibold text-white hover:bg-blueprint-deep disabled:cursor-not-allowed disabled:opacity-60"
+        disabled={isLoading}
+        onClick={handleGoogleLogin}
+        type="button"
+      >
+        {isLoading ? "Redirecting to Google…" : "Continue with Google"}
+      </button>
+
+      <Link className="mt-6 block text-sm font-medium text-blueprint hover:text-blueprint-deep" href="/">
+        Back to home
+      </Link>
     </main>
   );
 }

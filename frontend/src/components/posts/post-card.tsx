@@ -7,17 +7,28 @@ function formatDate(value: string) {
 }
 
 export function PostCard({ post }: { post: Post }) {
+  const accent = post.post_type === "LOST" ? "border-flag-rust" : "border-flag-amber";
+
   return (
-    <Link className="group overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm transition hover:border-cyan-500 hover:shadow-md" href={`/posts/${post.id}`}>
-      {post.image_url ? <img alt="Reported item" className="h-44 w-full object-cover" src={post.image_url} /> : <div className="flex h-44 items-center justify-center bg-slate-100 text-sm text-slate-500">No image provided</div>}
-      <div className="p-5">
-        <div className="flex items-center justify-between gap-3">
-          <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${post.post_type === "LOST" ? "bg-amber-100 text-amber-800" : "bg-emerald-100 text-emerald-800"}`}>{post.post_type}</span>
-          <span className="text-xs font-medium text-slate-500">{post.category}</span>
+    <Link
+      className={`group block border-t-4 ${accent} border-x border-b border-line bg-white transition hover:-translate-y-0.5 hover:shadow-sm`}
+      href={`/posts/${post.id}`}
+    >
+      {post.image_url ? (
+        <img alt="Reported item" className="h-40 w-full object-cover" src={post.image_url} />
+      ) : (
+        <div className="flex h-40 items-center justify-center bg-paper font-mono text-xs text-ink/40">
+          no image
         </div>
-        <p className="mt-3 line-clamp-2 font-semibold text-slate-900 group-hover:text-cyan-700">{post.description}</p>
-        <p className="mt-2 text-sm text-slate-600">{post.location}</p>
-        <p className="mt-1 text-xs text-slate-500">{formatDate(post.event_time)} BST</p>
+      )}
+      <div className="p-4">
+        <div className="flex items-center justify-between gap-3">
+          <span className="font-mono text-xs font-medium text-ink/60">{post.post_type}</span>
+          <span className="text-xs text-ink/50">{post.category}</span>
+        </div>
+        <p className="mt-2 line-clamp-2 font-medium text-ink group-hover:text-blueprint">{post.description}</p>
+        <p className="mt-2 text-sm text-ink/60">{post.location}</p>
+        <p className="mt-1 font-mono text-xs text-ink/40">{formatDate(post.event_time)}</p>
       </div>
     </Link>
   );

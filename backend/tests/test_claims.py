@@ -194,6 +194,54 @@ def test_reject_returns_found_post_to_active_when_no_pending_claims_remain() -> 
     assert found_after["status"] == "ACTIVE"
 
 
+def test_create_claim_requires_auth() -> None:
+    client = TestClient(app)
+    lost, found = _make_lost_and_found(client)
+
+    app.dependency_overrides.pop(get_current_user, None)
+    response = client.post("/api/v1/claims", json=_claim_payload(found["id"], lost["id"]))
+
+    assert response.status_code == 401
+    app.dependency_overrides[get_current_user] = owner  # restore for any tests after this one
+
+
+def test_approve_transaction_rolls_back_completely_on_failure() -> None:
+    """If any part of the approval write fails, NONE of it should be
+    committed - not the claim status, not either post's status, no
+    orphaned Resolution row."""
+    import app.services.claim_service as claim_service_module
+
+    client = TestClient(app)
+    lost, found = _make_lost_and_found(client)
+    claim = client.post("/api/v1/claims", json=_claim_payload(found["id"], lost["id"])).json()
+
+    def _boom(self, session, resolution):
+        raise RuntimeError("simulated failure while writing the resolution row")
+
+    original = claim_service_module.ClaimRepository.create_resolution
+    claim_service_module.ClaimRepository.create_resolution = _boom
+    try:
+        app.dependency_overrides[get_current_user] = other_user  # found post owner
+        with __import__("pytest").raises(RuntimeError):
+            client.post(f"/api/v1/claims/{claim['id']}/approve")
+    finally:
+        claim_service_module.ClaimRepository.create_resolution = original
+        app.dependency_overrides[get_current_user] = owner
+
+    with TestingSession() as session:
+        from app.database.models.claim import Claim, ClaimStatus, Resolution
+        from uuid import UUID
+
+        refreshed_claim = session.get(Claim, UUID(claim["id"]))
+        assert refreshed_claim.status == ClaimStatus.PENDING
+        assert session.query(Resolution).filter_by(claim_id=UUID(claim["id"])).first() is None
+
+    found_after = client.get(f"/api/v1/posts/{found['id']}").json()
+    lost_after = client.get(f"/api/v1/posts/{lost['id']}").json()
+    assert found_after["status"] == "CLAIM_PENDING"
+    assert lost_after["status"] == "ACTIVE"
+
+
 def test_reject_one_of_multiple_pending_claims_keeps_post_claim_pending() -> None:
     client = TestClient(app)
     lost, found = _make_lost_and_found(client)

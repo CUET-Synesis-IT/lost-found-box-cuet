@@ -3,9 +3,9 @@ from enum import StrEnum
 from uuid import UUID, uuid4
 
 from sqlalchemy import DateTime, Enum, ForeignKey, Text, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.database.models.post import Base
+from app.database.models.post import Base, Post, Profile
 
 
 class ClaimStatus(StrEnum):
@@ -47,6 +47,9 @@ class Claim(Base):
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=func.now()
     )
+
+    claimant: Mapped[Profile] = relationship(foreign_keys=[claimant_id])
+    related_lost_post: Mapped[Post] = relationship(foreign_keys=[related_lost_post_id])
 
 
 class Resolution(Base):

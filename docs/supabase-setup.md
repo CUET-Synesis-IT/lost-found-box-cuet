@@ -43,9 +43,9 @@ boundary.
 ## 3. PostgreSQL
 
 Supabase provides the project PostgreSQL database. Set `DATABASE_URL` only in
-`backend/.env`; it will be used when migrations and SQLAlchemy are added. Do
-not manually create the MVP tables from this phase—schema migrations are the
-next database-focused phase.
+`backend/.env`. Apply the tracked initial schema and RLS migration with
+`supabase db push` after linking the project. See [database.md](database.md)
+for table relationships, constraints, and the RLS verification query.
 
 ## 4. Storage
 

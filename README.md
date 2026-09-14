@@ -62,5 +62,6 @@ project and local environment files.
 Run backend authentication tests with `pytest` from `backend/` after Python
 and the dependencies in `requirements.txt` are installed.
 
-Database schema, posts, claims, and file uploads remain intentionally deferred
-to their dedicated implementation phases.
+The tracked database foundation (schema, constraints, indexes, profile trigger,
+and RLS) is documented in [docs/database.md](docs/database.md). Posts, claims,
+and file-upload APIs/UI remain intentionally deferred to their dedicated phases.

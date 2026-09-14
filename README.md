@@ -34,9 +34,33 @@ The health endpoint is available at `http://localhost:8000/health`.
 
 ## Supabase integration foundation
 
-The reusable browser Supabase client and backend token-validation configuration
-are in place. Follow [docs/supabase-setup.md](docs/supabase-setup.md) to
-configure a Supabase project and local environment files.
+The application supports Supabase Google OAuth for CUET institutional accounts.
+It persists sessions in Supabase-managed cookies, provides login/logout and an
+OAuth callback, protects `/dashboard` and future post-creation routes, and
+validates FastAPI bearer tokens at `GET /api/v1/auth/me`.
 
-Authentication UI, user authorization, database schema, posts, claims, and
-file uploads are intentionally deferred to their dedicated implementation phases.
+Only emails ending in `@student.cuet.ac.bd` or `@cuet.ac.bd` are permitted.
+This is enforced both after OAuth and in FastAPI's reusable
+`get_current_user()` dependency. Follow
+[docs/supabase-setup.md](docs/supabase-setup.md) to configure a Supabase
+project and local environment files.
+
+### Test authentication locally
+
+1. In Supabase, enable Google and register
+   `http://localhost:3000/auth/callback` as an allowed redirect URL.
+2. Configure the frontend and backend environment files as described in
+   [docs/supabase-setup.md](docs/supabase-setup.md).
+3. Start the frontend and backend, then visit `http://localhost:3000/login`.
+4. Complete Google OAuth using an allowed CUET email. The callback should take
+   you to `/dashboard`; use **Log out** to end the session.
+5. Copy the Supabase session access token from the browser's authenticated
+   session and call `GET /api/v1/auth/me` with
+   `Authorization: Bearer <access_token>`. It must return `200` only for an
+   unexpired, valid CUET token.
+
+Run backend authentication tests with `pytest` from `backend/` after Python
+and the dependencies in `requirements.txt` are installed.
+
+Database schema, posts, claims, and file uploads remain intentionally deferred
+to their dedicated implementation phases.

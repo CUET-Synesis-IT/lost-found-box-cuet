@@ -21,8 +21,8 @@ in this phase.
 
 ## 2. Authentication and token validation
 
-The next phase will implement Google login and FastAPI request protection.
-Before then, configure the backend with:
+Google login and FastAPI request protection are implemented. Configure the
+backend with:
 
 - `SUPABASE_URL`: establishes the expected issuer
   (`<project-url>/auth/v1`) and default JWKS URL.
@@ -35,8 +35,10 @@ The backend must validate signature, issuer, expiration, and audience before
 trusting a user identity. Frontend environment variables must never contain a
 JWT signing secret, database URL, or Supabase service-role key.
 
-CUET email-domain enforcement is intentionally deferred to the authentication
-phase, where it will be checked against the verified Supabase user identity.
+The frontend rejects non-CUET accounts after the OAuth callback for a clear UX.
+FastAPI independently validates every bearer token used on protected endpoints
+and rejects non-CUET emails. Frontend checks are therefore never the security
+boundary.
 
 ## 3. PostgreSQL
 
@@ -80,6 +82,10 @@ environment file.
 4. Start FastAPI with `uvicorn app.main:app --reload --port 8000` from
    `backend` after installing `requirements.txt`.
 5. Confirm `GET http://localhost:8000/health` returns `{"status":"ok"}`.
-6. The browser client can be imported through
-   `@/lib/supabase/client`. Login, database access, and file upload tests are
-   deferred until their dedicated MVP phases.
+6. Open `http://localhost:3000/login`, sign in with a CUET Google account, and
+   confirm the callback redirects to `/dashboard`.
+7. In the authenticated browser, use the session access token as a Bearer token
+   for `GET http://localhost:8000/api/v1/auth/me`. A CUET account returns its
+   verified identity; a non-CUET account is denied.
+8. Database access and file upload tests remain deferred to their dedicated
+   MVP phases.

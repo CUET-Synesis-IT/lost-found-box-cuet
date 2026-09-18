@@ -101,7 +101,7 @@ export default function PostDetailPage() {
 
           <p className="mt-6 whitespace-pre-wrap text-lg leading-8 text-ink">{post.description}</p>
 
-          <dl className="mt-8 grid gap-5 border-t border-line pt-6 sm:grid-cols-3">
+          <dl className="mt-8 grid gap-5 border-t border-line pt-6 sm:grid-cols-2 lg:grid-cols-4">
             <div>
               <dt className="text-xs text-ink/50">Location</dt>
               <dd className="mt-1 text-ink">{post.location}</dd>
@@ -113,6 +113,10 @@ export default function PostDetailPage() {
             <div>
               <dt className="text-xs text-ink/50">Status</dt>
               <dd className="mt-1 text-ink">{post.status.replace("_", " ")}</dd>
+            </div>
+            <div>
+              <dt className="text-xs text-ink/50">Posted by</dt>
+              <dd className="mt-1 text-ink">{post.owner.email}</dd>
             </div>
           </dl>
 

@@ -60,11 +60,19 @@ class PostUpdate(BaseModel):
         return value
 
 
+class PostOwnerInfo(BaseModel):
+    """Only the CUET-verified email is shown - Profile has no name field."""
+
+    model_config = ConfigDict(from_attributes=True)
+    email: str
+
+
 class PostRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: UUID
     user_id: UUID
+    owner: PostOwnerInfo
     post_type: PostType
     category: str
     description: str

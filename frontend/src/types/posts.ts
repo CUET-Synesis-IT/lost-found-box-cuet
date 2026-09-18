@@ -6,9 +6,14 @@ export const POST_CATEGORIES = [
 export type PostType = "LOST" | "FOUND";
 export type PostStatus = "ACTIVE" | "CLAIM_PENDING" | "RESOLVED" | "ARCHIVED";
 
+export type PostOwnerInfo = {
+  email: string;
+};
+
 export type Post = {
   id: string;
   user_id: string;
+  owner: PostOwnerInfo;
   post_type: PostType;
   category: string;
   description: string;

@@ -60,12 +60,16 @@ class PostService:
     def delete_post(self, session: Session, post_id: UUID, user_id: UUID) -> None:
         post = self.get_post(session, post_id)
         self._require_owner(post, user_id)
+        if self.repository.has_claims(session, post.id):
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Posts with claims cannot be deleted.")
         try:
             self.repository.delete(session, post)
             session.commit()
-        except IntegrityError:
+        except SQLAlchemyError as error:
             session.rollback()
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Posts with claims cannot be deleted.") from None
+            detail = "Posts with claims cannot be deleted." if "claims" in str(error).lower() else "Post could not be deleted."
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=detail) from None
+
 
     @staticmethod
     def _require_owner(post: Post, user_id: UUID) -> None:

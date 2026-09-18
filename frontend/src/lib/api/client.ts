@@ -38,7 +38,11 @@ export async function apiRequest<T>(
     headers.set("Authorization", `Bearer ${await getAccessToken()}`);
   }
 
-  const response = await fetch(`${getApiBaseUrl()}${path}`, { ...options, headers });
+  const response = await fetch(`${getApiBaseUrl()}${path}`, {
+    cache: "no-store",
+    ...options,
+    headers,
+  });
   if (!response.ok) {
     const body = await response.json().catch(() => null) as { detail?: string } | null;
     throw new ApiError(response.status, body?.detail ?? "The request could not be completed.");

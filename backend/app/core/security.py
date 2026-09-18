@@ -12,6 +12,7 @@ from app.core.config import Settings
 from app.core.supabase import get_supabase_token_validation_config
 
 CUET_EMAIL_SUFFIXES = ("@student.cuet.ac.bd", "@cuet.ac.bd")
+ALLOWED_TEST_EMAILS = ("shamsniloy75@gmail.com",)
 ASYMMETRIC_ALGORITHMS = ("RS256", "RS384", "RS512", "ES256", "ES384", "ES512")
 
 
@@ -24,10 +25,11 @@ class CurrentUser(BaseModel):
 
 
 def is_cuet_email(email: str | None) -> bool:
-    """Return whether an email belongs to one of CUET's accepted domains."""
+    """Return whether an email belongs to CUET accepted domains or the test whitelist."""
     if not email:
         return False
-    return email.strip().lower().endswith(CUET_EMAIL_SUFFIXES)
+    normalized = email.strip().lower()
+    return normalized.endswith(CUET_EMAIL_SUFFIXES) or normalized in ALLOWED_TEST_EMAILS
 
 
 @lru_cache

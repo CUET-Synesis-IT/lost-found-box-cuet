@@ -53,6 +53,17 @@ def test_authenticated_cuet_user_can_access_me() -> None:
     assert response.json()["email"] == "u2104087@student.cuet.ac.bd"
 
 
+def test_allowed_test_user_can_access_me() -> None:
+    client = TestClient(app)
+    response = client.get(
+        "/api/v1/auth/me",
+        headers={"Authorization": f"Bearer {make_token('shamsniloy75@gmail.com')}"},
+    )
+
+    assert response.status_code == 200
+    assert response.json()["email"] == "shamsniloy75@gmail.com"
+
+
 def test_non_cuet_user_is_denied_even_with_valid_token() -> None:
     client = TestClient(app)
     response = client.get(

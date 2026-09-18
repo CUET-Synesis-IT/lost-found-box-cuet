@@ -46,6 +46,14 @@ class PostRepository:
         items = session.scalars(statement.order_by(Post.created_at.desc()).offset((page - 1) * limit).limit(limit)).all()
         return list(items), total
 
+    def has_claims(self, session: Session, post_id: UUID) -> bool:
+        from app.database.models.claim import Claim
+        return bool(session.scalar(
+            select(Claim.id).where(
+                or_(Claim.found_post_id == post_id, Claim.related_lost_post_id == post_id)
+            ).limit(1)
+        ))
+
     @staticmethod
     def filtered_statement(
         post_type: PostType | None,
@@ -61,8 +69,9 @@ class PostRepository:
         if status:
             statement = statement.where(Post.status == status)
         else:
-            statement = statement.where(Post.status == PostStatus.ACTIVE)
+            statement = statement.where(Post.status.in_([PostStatus.ACTIVE, PostStatus.CLAIM_PENDING]))
         if search:
             pattern = f"%{search.strip()}%"
             statement = statement.where(or_(Post.description.ilike(pattern), Post.location.ilike(pattern)))
         return statement
+

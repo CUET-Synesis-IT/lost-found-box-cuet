@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     app_name: str = "CUET Lost and Found Box API"
     app_env: str = "development"
     debug: bool = True
-    cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000"
+    cors_origins: str = "http://localhost:3000,http://127.0.0.1:3000,http://[::1]:3000"
 
     # Supabase integration. Values remain optional until the Supabase project
     # is provisioned so the Phase 1 health endpoint can still run locally.

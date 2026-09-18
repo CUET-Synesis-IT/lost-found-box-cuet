@@ -58,6 +58,7 @@ export default function PostDetailPage() {
     try {
       await postsApi.remove(post.id);
       showToast("Post deleted.", "success");
+      router.refresh();
       router.replace("/posts");
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "Post could not be deleted.");
@@ -70,7 +71,11 @@ export default function PostDetailPage() {
     return (
       <main className="mx-auto max-w-xl px-6 py-16 text-center">
         <p className="border-l-4 border-flag-rust bg-flag-rust-soft/30 p-4 text-ink">{error ?? "Post not found."}</p>
-        <Link className="mt-5 inline-block font-medium text-blueprint hover:text-blueprint-deep" href="/posts">
+        <Link
+          className="mt-5 inline-block font-medium text-blueprint hover:text-blueprint-deep"
+          href="/posts"
+          onClick={() => router.refresh()}
+        >
           Back to posts
         </Link>
       </main>

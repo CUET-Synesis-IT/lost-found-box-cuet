@@ -8,7 +8,7 @@ from sqlalchemy.pool import StaticPool
 
 from app.api.dependencies import get_current_user
 from app.core.security import CurrentUser
-from app.database.models import Base, Profile
+from app.database.models import Base, Claim, Post, PostStatus, PostType, Profile
 from app.database.session import get_db_session
 from app.database.session import normalize_database_url
 from app.main import app
@@ -158,3 +158,55 @@ def test_mine_returns_only_current_users_posts_regardless_of_status() -> None:
     assert response.status_code == 200
     ids = {p["id"] for p in response.json()}
     assert ids == {mine_active["id"], mine_resolved["id"]}
+
+
+def test_feed_includes_both_active_and_claim_pending_posts() -> None:
+    client = TestClient(app)
+    active_post = create_post(client, description="Active post")
+    claim_pending_post = create_post(client, description="Claim pending post")
+    resolved_post = create_post(client, description="Resolved post")
+
+    with Session(engine) as session:
+        session.get(Post, UUID(claim_pending_post["id"])).status = PostStatus.CLAIM_PENDING
+        session.get(Post, UUID(resolved_post["id"])).status = PostStatus.RESOLVED
+        session.commit()
+
+    response = client.get("/api/v1/posts")
+    assert response.status_code == 200
+    ids = {p["id"] for p in response.json()["items"]}
+    assert active_post["id"] in ids
+    assert claim_pending_post["id"] in ids
+    assert resolved_post["id"] not in ids
+
+
+def test_post_with_claim_cannot_be_deleted() -> None:
+    client = TestClient(app)
+    found_post = create_post(client, post_type="FOUND", description="Found keys")
+
+    app.dependency_overrides[get_current_user] = other_user
+    lost_post = create_post(client, post_type="LOST", description="Lost keys")
+
+    with Session(engine) as session:
+        claim = Claim(
+            found_post_id=UUID(found_post["id"]),
+            claimant_id=OTHER_ID,
+            related_lost_post_id=UUID(lost_post["id"]),
+        )
+        session.add(claim)
+        session.commit()
+
+    response_lost = client.delete(f"/api/v1/posts/{lost_post['id']}")
+    assert response_lost.status_code == 409
+    assert response_lost.json()["detail"] == "Posts with claims cannot be deleted."
+
+    app.dependency_overrides[get_current_user] = owner
+    response_found = client.delete(f"/api/v1/posts/{found_post['id']}")
+    assert response_found.status_code == 409
+    assert response_found.json()["detail"] == "Posts with claims cannot be deleted."
+
+
+def test_api_responses_include_cache_control_headers() -> None:
+    client = TestClient(app)
+    response = client.get("/api/v1/posts")
+    assert "no-store" in response.headers.get("cache-control", "")
+

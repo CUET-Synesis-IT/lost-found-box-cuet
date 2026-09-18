@@ -29,6 +29,7 @@ export function PostCard({ post }: { post: Post }) {
         <p className="mt-2 line-clamp-2 font-medium text-ink group-hover:text-blueprint">{post.description}</p>
         <p className="mt-2 text-sm text-ink/60">{post.location}</p>
         <p className="mt-1 font-mono text-xs text-ink/40">{formatDate(post.event_time)}</p>
+        <p className="mt-1 text-xs text-ink/40">Posted by {post.owner.email}</p>
       </div>
     </Link>
   );

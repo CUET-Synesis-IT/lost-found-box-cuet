@@ -126,6 +126,15 @@ class ClaimService:
             claim.status = ClaimStatus.APPROVED
             found_post.status = PostStatus.RESOLVED
             lost_post.status = PostStatus.RESOLVED
+            # Flush these UPDATEs before inserting the Resolution row. The DB's
+            # validate_resolution trigger (BEFORE INSERT on resolutions) reads
+            # the claim's live status - without this flush, SQLAlchemy's
+            # default flush ordering sends the resolutions INSERT before the
+            # claims UPDATE, so the trigger still sees PENDING and rejects it
+            # with "resolution must match an approved claim". Reproduced and
+            # confirmed against the real Postgres schema (SQLite, used in
+            # tests, has no such trigger, so this never showed up there).
+            session.flush()
             self.repository.create_resolution(
                 session,
                 Resolution(lost_post_id=lost_post.id, found_post_id=found_post.id, claim_id=claim.id),

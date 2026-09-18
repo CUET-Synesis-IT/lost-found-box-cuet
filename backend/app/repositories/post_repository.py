@@ -41,9 +41,10 @@ class PostRepository:
             select(Post).where(Post.user_id == user_id).order_by(Post.created_at.desc())
         ).all())
 
-    def list(self, session: Session, statement: Select[tuple[Post]], page: int, limit: int) -> tuple[list[Post], int]:
+    def list(self, session: Session, statement: Select[tuple[Post]], page: int, limit: int, sort: str = "newest") -> tuple[list[Post], int]:
         total = session.scalar(select(func.count()).select_from(statement.order_by(None).subquery())) or 0
-        items = session.scalars(statement.order_by(Post.created_at.desc()).offset((page - 1) * limit).limit(limit)).all()
+        order = Post.created_at.asc() if sort == "oldest" else Post.created_at.desc()
+        items = session.scalars(statement.order_by(order).offset((page - 1) * limit).limit(limit)).all()
         return list(items), total
 
     def has_claims(self, session: Session, post_id: UUID) -> bool:

@@ -27,8 +27,8 @@ class PostService:
             session.rollback()
             raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Could not create post for this user.") from None
 
-    def list_posts(self, session: Session, post_type: PostType | None, category: str | None, post_status: PostStatus | None, search: str | None, page: int, limit: int) -> tuple[list[Post], int]:
-        return self.repository.list(session, self.repository.filtered_statement(post_type, category, post_status, search), page, limit)
+    def list_posts(self, session: Session, post_type: PostType | None, category: str | None, post_status: PostStatus | None, search: str | None, page: int, limit: int, sort: str = "newest") -> tuple[list[Post], int]:
+        return self.repository.list(session, self.repository.filtered_statement(post_type, category, post_status, search), page, limit, sort)
 
     def list_my_posts(self, session: Session, user_id: UUID) -> list[Post]:
         return self.repository.list_by_owner(session, user_id)

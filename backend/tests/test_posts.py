@@ -1,4 +1,5 @@
 from datetime import UTC, datetime
+import time
 from uuid import UUID, uuid4
 
 from fastapi.testclient import TestClient
@@ -139,6 +140,32 @@ def test_standard_postgres_url_uses_pg8000() -> None:
     assert normalize_database_url("postgresql://user:password@host:5432/database") == "postgresql+pg8000://user:password@host:5432/database"
 
 
+def test_sort_newest_and_oldest() -> None:
+    client = TestClient(app)
+    first = create_post(client, description="First reported")
+    # SQLite's CURRENT_TIMESTAMP is second-granularity (unlike Postgres's
+    # microsecond precision) - without this, both posts can land in the
+    # same second and the two rows would be indistinguishable by created_at.
+    time.sleep(1.1)
+    second = create_post(client, description="Second reported")
+
+    newest = client.get("/api/v1/posts", params={"sort": "newest"})
+    assert newest.status_code == 200
+    ids_newest = [item["id"] for item in newest.json()["items"]]
+    assert ids_newest.index(second["id"]) < ids_newest.index(first["id"])
+
+    oldest = client.get("/api/v1/posts", params={"sort": "oldest"})
+    assert oldest.status_code == 200
+    ids_oldest = [item["id"] for item in oldest.json()["items"]]
+    assert ids_oldest.index(first["id"]) < ids_oldest.index(second["id"])
+
+
+def test_invalid_sort_value_is_rejected() -> None:
+    client = TestClient(app)
+    response = client.get("/api/v1/posts", params={"sort": "random"})
+    assert response.status_code == 422
+
+
 def test_mine_requires_auth() -> None:
     app.dependency_overrides.pop(get_current_user)
     assert TestClient(app).get("/api/v1/posts/mine").status_code == 401
@@ -209,4 +236,3 @@ def test_api_responses_include_cache_control_headers() -> None:
     client = TestClient(app)
     response = client.get("/api/v1/posts")
     assert "no-store" in response.headers.get("cache-control", "")
-

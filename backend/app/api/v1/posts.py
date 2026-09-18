@@ -37,13 +37,14 @@ def list_posts(
     category: str | None = Query(default=None),
     status_filter: PostStatus | None = Query(default=None, alias="status"),
     search: str | None = Query(default=None, min_length=1, max_length=200),
+    sort: str = Query(default="newest", pattern="^(newest|oldest)$"),
     page: int = Query(default=1, ge=1),
     limit: int = Query(default=20, ge=1, le=100),
 ) -> PostListResponse:
     if category is not None and category not in CATEGORIES:
         from fastapi import HTTPException
         raise HTTPException(status_code=422, detail="category must be one of the configured MVP categories")
-    items, total = service.list_posts(session, post_type, category, status_filter, search, page, limit)
+    items, total = service.list_posts(session, post_type, category, status_filter, search, page, limit, sort)
     return PostListResponse(items=items, page=page, limit=limit, total=total)
 
 

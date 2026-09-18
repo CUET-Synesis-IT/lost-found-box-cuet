@@ -7,11 +7,14 @@ import { PostCard } from "@/components/posts/post-card";
 import { postsApi } from "@/lib/api/posts";
 import { POST_CATEGORIES, type PostList, type PostType } from "@/types/posts";
 
+type SortOrder = "newest" | "oldest";
+
 export default function PostsPage() {
   const [data, setData] = useState<PostList | null>(null);
   const [postType, setPostType] = useState<PostType | "">("");
   const [category, setCategory] = useState("");
   const [search, setSearch] = useState("");
+  const [sort, setSort] = useState<SortOrder>("newest");
   const [page, setPage] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -22,7 +25,7 @@ export default function PostsPage() {
     setLoading(true);
     setError(null);
     postsApi
-      .list({ postType: postType || undefined, category: category || undefined, search: search.trim() || undefined, page })
+      .list({ postType: postType || undefined, category: category || undefined, search: search.trim() || undefined, sort, page })
       .then((result) => {
         if (active) setData(result);
       })
@@ -35,7 +38,7 @@ export default function PostsPage() {
     return () => {
       active = false;
     };
-  }, [postType, category, search, page, reloadKey]);
+  }, [postType, category, search, sort, page, reloadKey]);
 
   function resetPage() {
     setPage(1);
@@ -53,7 +56,7 @@ export default function PostsPage() {
         </Link>
       </div>
 
-      <section className="mt-6 grid gap-3 border-y border-line py-4 md:grid-cols-3">
+      <section className="mt-6 grid gap-3 border-y border-line py-4 md:grid-cols-4">
         <input
           aria-label="Search posts"
           className="border border-line bg-white p-2.5 text-sm placeholder:text-ink/40 focus:border-blueprint focus:outline-none"
@@ -90,6 +93,18 @@ export default function PostsPage() {
           {POST_CATEGORIES.map((value) => (
             <option key={value}>{value}</option>
           ))}
+        </select>
+        <select
+          aria-label="Sort order"
+          className="border border-line bg-white p-2.5 text-sm focus:border-blueprint focus:outline-none"
+          value={sort}
+          onChange={(e) => {
+            setSort(e.target.value as SortOrder);
+            resetPage();
+          }}
+        >
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
         </select>
       </section>
 

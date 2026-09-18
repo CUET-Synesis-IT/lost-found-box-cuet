@@ -6,6 +6,7 @@ type PostFilters = {
   category?: string;
   status?: PostStatus;
   search?: string;
+  sort?: "newest" | "oldest";
   page?: number;
   limit?: number;
 };
@@ -17,6 +18,7 @@ export const postsApi = {
     if (filters.category) params.set("category", filters.category);
     if (filters.status) params.set("status", filters.status);
     if (filters.search) params.set("search", filters.search);
+    params.set("sort", filters.sort ?? "newest");
     params.set("page", String(filters.page ?? 1));
     params.set("limit", String(filters.limit ?? 12));
     return apiRequest<PostList>(`/api/v1/posts?${params.toString()}`);

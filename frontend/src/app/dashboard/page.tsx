@@ -7,6 +7,7 @@ import { claimsApi } from "@/lib/api/claims";
 import { postsApi } from "@/lib/api/posts";
 import type { Claim } from "@/types/claims";
 import type { Post } from "@/types/posts";
+import { useToast } from "@/components/toast";
 
 function PostRow({ post }: { post: Post }) {
   const accent = post.post_type === "LOST" ? "border-flag-rust" : "border-flag-amber";
@@ -39,6 +40,7 @@ function ClaimBadge({ status }: { status: string }) {
 }
 
 export default function DashboardPage() {
+  const { showToast } = useToast();
   const [posts, setPosts] = useState<Post[] | null>(null);
   const [postsError, setPostsError] = useState<string | null>(null);
 
@@ -81,8 +83,10 @@ export default function DashboardPage() {
     try {
       await (action === "approve" ? claimsApi.approve(claimId) : claimsApi.reject(claimId));
       loadPostsAndReceivedClaims();
+      showToast(`Claim ${action === "approve" ? "approved" : "rejected"} successfully!`, "success");
     } catch (requestError) {
       setReceivedError(requestError instanceof Error ? requestError.message : "Action failed.");
+      showToast(requestError instanceof Error ? requestError.message : "Action failed.", "error");
     } finally {
       setActingOn(null);
     }

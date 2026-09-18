@@ -1,9 +1,10 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
 
 import { validatePostImage } from "@/lib/supabase/storage";
 import { POST_CATEGORIES, type Post, type PostPayload, type PostType } from "@/types/posts";
+import { useToast } from "@/components/toast";
 
 type FormValues = { postType: PostType; category: string; description: string; location: string; eventTime: string };
 
@@ -34,11 +35,13 @@ export function PostForm({
   submitLabel: string;
   onSubmit: (payload: PostPayload, image: File | null) => Promise<void>;
 }) {
+  const { showToast } = useToast();
   const [values, setValues] = useState(() => initialValues(post));
   const [image, setImage] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(post?.image_url ?? null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(
     () => () => {
@@ -57,12 +60,22 @@ export function PostForm({
     const validationError = validatePostImage(file);
     if (validationError) {
       setError(validationError);
+      showToast(validationError, "error");
       event.target.value = "";
       return;
     }
     setError(null);
     setImage(file);
     setPreviewUrl(URL.createObjectURL(file));
+  }
+
+  function removeImage() {
+    setImage(null);
+    setPreviewUrl(null);
+    setError(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
   }
 
   async function submit(event: FormEvent<HTMLFormElement>) {
@@ -137,10 +150,21 @@ export function PostForm({
       <label className={`block ${labelClass}`}>
         Optional image
         <span className="mt-1 block text-xs font-normal text-ink/50">JPEG, PNG, or WebP; maximum 5 MB.</span>
-        <input accept="image/jpeg,image/png,image/webp" className="mt-1.5 block w-full text-sm text-ink/70" onChange={selectImage} type="file" />
+        <input ref={fileInputRef} accept="image/jpeg,image/png,image/webp" className="mt-1.5 block w-full text-sm text-ink/70" onChange={selectImage} type="file" />
       </label>
 
-      {previewUrl ? <img alt="Image preview" className="max-h-64 border border-line object-cover" src={previewUrl} /> : null}
+      {previewUrl ? (
+        <div className="relative">
+          <img alt="Image preview" className="max-h-64 border border-line object-cover" src={previewUrl} />
+          <button
+            type="button"
+            onClick={removeImage}
+            className="absolute right-2 top-2 rounded bg-ink/70 px-2.5 py-1 text-xs font-medium text-white hover:bg-ink"
+          >
+            Remove image
+          </button>
+        </div>
+      ) : null}
 
       <button
         className="w-full bg-blueprint px-4 py-3 font-semibold text-white hover:bg-blueprint-deep disabled:cursor-not-allowed disabled:opacity-60"

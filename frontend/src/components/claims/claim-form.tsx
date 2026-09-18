@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { claimsApi } from "@/lib/api/claims";
 import { postsApi } from "@/lib/api/posts";
 import type { Post } from "@/types/posts";
+import { useToast } from "@/components/toast";
 
 export function ClaimForm({
   foundPostId,
@@ -15,6 +16,7 @@ export function ClaimForm({
   currentUserId: string;
   onClaimed: () => void;
 }) {
+  const { showToast } = useToast();
   const [myLostPosts, setMyLostPosts] = useState<Post[] | null>(null);
   const [selectedLostPostId, setSelectedLostPostId] = useState("");
   const [message, setMessage] = useState("");
@@ -44,6 +46,7 @@ export function ClaimForm({
       onClaimed();
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "Could not submit claim.");
+      showToast(requestError instanceof Error ? requestError.message : "Could not submit claim.", "error");
     } finally {
       setSubmitting(false);
     }

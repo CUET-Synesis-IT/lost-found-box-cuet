@@ -6,9 +6,11 @@ import { useRouter } from "next/navigation";
 import { PostForm } from "@/components/posts/post-form";
 import { postsApi } from "@/lib/api/posts";
 import { uploadPostImage } from "@/lib/supabase/storage";
+import { useToast } from "@/components/toast";
 
 export default function CreatePostPage() {
   const router = useRouter();
+  const { showToast } = useToast();
 
   return (
     <main className="mx-auto min-h-screen max-w-2xl px-6 py-10">
@@ -21,12 +23,17 @@ export default function CreatePostPage() {
         <PostForm
           submitLabel="Publish post"
           onSubmit={async (payload, image) => {
-            const post = await postsApi.create(payload);
-            if (image) {
-              const imageUrl = await uploadPostImage(post.id, image);
-              await postsApi.update(post.id, { image_url: imageUrl });
+            try {
+              const post = await postsApi.create(payload);
+              if (image) {
+                const imageUrl = await uploadPostImage(post.id, image);
+                await postsApi.update(post.id, { image_url: imageUrl });
+              }
+              showToast("Post published successfully!", "success");
+              router.replace(`/posts/${post.id}`);
+            } catch (err) {
+              showToast(err instanceof Error ? err.message : "The post could not be saved.", "error");
             }
-            router.replace(`/posts/${post.id}`);
           }}
         />
       </section>

@@ -10,6 +10,7 @@ import type { Post } from "@/types/posts";
 import { SimilarPosts } from "@/components/posts/similar-posts";
 import { ClaimForm } from "@/components/claims/claim-form";
 import { ReceivedClaims } from "@/components/claims/received-claims";
+import { useToast } from "@/components/toast";
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("en-GB", {
@@ -22,6 +23,7 @@ function formatDate(value: string) {
 export default function PostDetailPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
+  const { showToast } = useToast();
   const [post, setPost] = useState<Post | null>(null);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -55,6 +57,7 @@ export default function PostDetailPage() {
     setDeleting(true);
     try {
       await postsApi.remove(post.id);
+      showToast("Post deleted.", "success");
       router.replace("/posts");
     } catch (requestError) {
       setError(requestError instanceof Error ? requestError.message : "Post could not be deleted.");
@@ -144,6 +147,7 @@ export default function PostDetailPage() {
                 onClaimed={() => {
                   setJustClaimed(true);
                   setClaimsRefreshKey((key) => key + 1);
+                  showToast("Claim submitted successfully!", "success");
                 }}
               />
             </div>

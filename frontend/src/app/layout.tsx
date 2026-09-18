@@ -9,6 +9,7 @@ import "@fontsource/ibm-plex-mono/400.css";
 import "@fontsource/ibm-plex-mono/500.css";
 
 import { AuthControls } from "@/components/auth/auth-controls";
+import { ToastProvider } from "@/components/toast";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -44,7 +45,7 @@ export default function RootLayout({
             </nav>
           </div>
         </header>
-        {children}
+        <ToastProvider>{children}</ToastProvider>
       </body>
     </html>
   );

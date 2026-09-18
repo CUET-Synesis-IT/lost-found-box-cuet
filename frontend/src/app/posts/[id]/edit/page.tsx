@@ -9,10 +9,12 @@ import { postsApi } from "@/lib/api/posts";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 import { uploadPostImage } from "@/lib/supabase/storage";
 import type { Post } from "@/types/posts";
+import { useToast } from "@/components/toast";
 
 export default function EditPostPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
+  const { showToast } = useToast();
   const [post, setPost] = useState<Post | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -57,9 +59,14 @@ export default function EditPostPage() {
           post={post}
           submitLabel="Save changes"
           onSubmit={async (payload, image) => {
-            const imageUrl = image ? await uploadPostImage(post.id, image) : post.image_url;
-            const updated = await postsApi.update(post.id, { ...payload, image_url: imageUrl });
-            router.replace(`/posts/${updated.id}`);
+            try {
+              const imageUrl = image ? await uploadPostImage(post.id, image) : post.image_url;
+              const updated = await postsApi.update(post.id, { ...payload, image_url: imageUrl });
+              showToast("Post updated successfully!", "success");
+              router.replace(`/posts/${updated.id}`);
+            } catch (err) {
+              showToast(err instanceof Error ? err.message : "Could not update the post.", "error");
+            }
           }}
         />
       </section>

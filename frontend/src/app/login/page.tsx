@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 import { isCuetEmail } from "@/lib/auth/email";
 import { getSupabaseBrowserClient } from "@/lib/supabase/client";
@@ -10,15 +10,17 @@ import { getSupabaseBrowserClient } from "@/lib/supabase/client";
 const errorMessages: Record<string, string> = {
   oauth_failed: "Google sign-in could not be completed. Please try again.",
   unauthorized_email: "Please sign in with a CUET institutional Google account.",
+  auth_required: "You must log in to access this page.",
 };
 
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const errorCode = new URLSearchParams(window.location.search).get("error");
+    const errorCode = searchParams.get("error");
     if (errorCode) {
       setError(errorMessages[errorCode] ?? "Sign-in could not be completed.");
     }
@@ -26,22 +28,29 @@ export default function LoginPage() {
     const supabase = getSupabaseBrowserClient();
     supabase.auth.getUser().then(async ({ data }) => {
       if (data.user && isCuetEmail(data.user.email)) {
-        router.replace("/dashboard");
+        const next = searchParams.get("next");
+        const destination = next?.startsWith("/") ? next : "/dashboard";
+        router.replace(destination);
       } else if (data.user) {
         await supabase.auth.signOut();
         setError(errorMessages.unauthorized_email);
       }
     });
-  }, [router]);
+  }, [router, searchParams]);
 
   async function handleGoogleLogin() {
     setError(null);
     setIsLoading(true);
 
-    const redirectTo = new URL("/auth/callback", window.location.origin).toString();
+    const next = searchParams.get("next");
+    const callbackUrl = new URL("/auth/callback", window.location.origin);
+    if (next) {
+      callbackUrl.searchParams.set("next", next);
+    }
+
     const { error: signInError } = await getSupabaseBrowserClient().auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo },
+      options: { redirectTo: callbackUrl.toString() },
     });
 
     if (signInError) {

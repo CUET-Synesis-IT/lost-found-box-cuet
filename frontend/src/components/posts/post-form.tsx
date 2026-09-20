@@ -41,7 +41,13 @@ export function PostForm({
   const [previewUrl, setPreviewUrl] = useState<string | null>(post?.image_url ?? null);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [maxDateTime, setMaxDateTime] = useState<string>("");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    // Restrict selecting any date beyond current client machine local time
+    setMaxDateTime(toLocalInput(new Date().toISOString()));
+  }, []);
 
   useEffect(
     () => () => {
@@ -83,6 +89,11 @@ export function PostForm({
     setError(null);
     if (!values.eventTime) {
       setError("Choose when the item was lost or found.");
+      return;
+    }
+    // Final code validation check to block future timestamps
+    if (new Date(values.eventTime) > new Date()) {
+      setError("The lost/found time cannot be in the future.");
       return;
     }
     setSubmitting(true);
@@ -143,7 +154,14 @@ export function PostForm({
         </label>
         <label className={labelClass}>
           Lost/found time
-          <input className={fieldClass} required type="datetime-local" value={values.eventTime} onChange={(e) => update("eventTime", e.target.value)} />
+          <input
+            className={fieldClass}
+            required
+            type="datetime-local"
+            max={maxDateTime}
+            value={values.eventTime}
+            onChange={(e) => update("eventTime", e.target.value)}
+          />
         </label>
       </div>
 

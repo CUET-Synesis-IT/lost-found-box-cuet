@@ -7,11 +7,12 @@ import { PostCard } from "@/components/posts/post-card";
 import { postsApi } from "@/lib/api/posts";
 import { POST_CATEGORIES, type PostList, type PostType } from "@/types/posts";
 
+type FilterType = "" | "LOST" | "FOUND" | "RESOLVED";
 type SortOrder = "newest" | "oldest";
 
 export default function PostsPage() {
   const [data, setData] = useState<PostList | null>(null);
-  const [postType, setPostType] = useState<PostType | "">("");
+  const [filterType, setFilterType] = useState<FilterType>("");
   const [category, setCategory] = useState("");
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState<SortOrder>("newest");
@@ -24,8 +25,29 @@ export default function PostsPage() {
     let active = true;
     setLoading(true);
     setError(null);
+
+    const params: {
+      postType?: PostType;
+      category?: string;
+      status?: "RESOLVED";
+      search?: string;
+      sort: SortOrder;
+      page: number;
+    } = {
+      category: category || undefined,
+      search: search.trim() || undefined,
+      sort,
+      page,
+    };
+
+    if (filterType === "RESOLVED") {
+      params.status = "RESOLVED";
+    } else if (filterType === "LOST" || filterType === "FOUND") {
+      params.postType = filterType;
+    }
+
     postsApi
-      .list({ postType: postType || undefined, category: category || undefined, search: search.trim() || undefined, sort, page })
+      .list(params)
       .then((result) => {
         if (active) setData(result);
       })
@@ -38,7 +60,7 @@ export default function PostsPage() {
     return () => {
       active = false;
     };
-  }, [postType, category, search, sort, page, reloadKey]);
+  }, [filterType, category, search, sort, page, reloadKey]);
 
   function resetPage() {
     setPage(1);
@@ -70,15 +92,16 @@ export default function PostsPage() {
         <select
           aria-label="Filter by report type"
           className="border border-line bg-white p-2.5 text-sm focus:border-blueprint focus:outline-none"
-          value={postType}
+          value={filterType}
           onChange={(e) => {
-            setPostType(e.target.value as PostType | "");
+            setFilterType(e.target.value as FilterType);
             resetPage();
           }}
         >
           <option value="">All report types</option>
           <option value="LOST">Lost</option>
           <option value="FOUND">Found</option>
+          <option value="RESOLVED">Resolved</option>
         </select>
         <select
           aria-label="Filter by category"

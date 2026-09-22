@@ -101,22 +101,22 @@ export default function PostDetailPage() {
 
           <p className="mt-6 whitespace-pre-wrap text-lg leading-8 text-ink">{post.description}</p>
 
-          <dl className="mt-8 grid gap-5 border-t border-line pt-6 sm:grid-cols-2 lg:grid-cols-4">
-            <div>
+          <dl className="mt-8 grid grid-cols-1 gap-x-8 gap-y-5 border-t border-line pt-6 sm:grid-cols-2">
+            <div className="min-w-0">
               <dt className="text-xs text-ink/50">Location</dt>
-              <dd className="mt-1 text-ink">{post.location}</dd>
+              <dd className="mt-1 break-words text-ink">{post.location}</dd>
             </div>
-            <div>
+            <div className="min-w-0">
               <dt className="text-xs text-ink/50">Lost/found time</dt>
               <dd className="mt-1 text-ink">{formatDate(post.event_time)}</dd>
             </div>
-            <div>
+            <div className="min-w-0">
               <dt className="text-xs text-ink/50">Status</dt>
               <dd className="mt-1 text-ink">{post.status.replace("_", " ")}</dd>
             </div>
-            <div>
+            <div className="min-w-0">
               <dt className="text-xs text-ink/50">Posted by</dt>
-              <dd className="mt-1 text-ink">{post.owner.email}</dd>
+              <dd className="mt-1 break-all text-ink">{post.owner.email}</dd>
             </div>
           </dl>
 

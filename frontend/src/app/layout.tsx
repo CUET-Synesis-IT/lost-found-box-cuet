@@ -9,6 +9,7 @@ import "@fontsource/ibm-plex-mono/400.css";
 import "@fontsource/ibm-plex-mono/500.css";
 
 import { AuthControls } from "@/components/auth/auth-controls";
+import { AuthGuard } from "@/components/auth/auth-guard";
 import { ToastProvider } from "@/components/toast";
 import "./globals.css";
 
@@ -32,20 +33,13 @@ export default function RootLayout({
               </span>
             </Link>
             <nav className="flex items-center gap-5 text-sm font-medium text-ink/70">
-              <Link href="/posts" className="hover:text-ink">
-                Browse
-              </Link>
-              <Link href="/posts/create" className="hover:text-ink">
-                Report an item
-              </Link>
-              <Link href="/dashboard" className="hidden hover:text-ink sm:inline">
-                Dashboard
-              </Link>
               <AuthControls />
             </nav>
           </div>
         </header>
-        <ToastProvider>{children}</ToastProvider>
+        <ToastProvider>
+          <AuthGuard>{children}</AuthGuard>
+        </ToastProvider>
       </body>
     </html>
   );
